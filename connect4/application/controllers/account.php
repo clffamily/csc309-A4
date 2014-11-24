@@ -28,7 +28,8 @@ class Account extends CI_Controller {
     		$this->load->library('form_validation');
     		$this->form_validation->set_rules('username', 'Username', 'required');
     		$this->form_validation->set_rules('password', 'Password', 'required');
-
+    		$this->form_validation->set_rules('captcha_code', 'Captcha', 'required|callback_check_captcha');
+    		
     		if ($this->form_validation->run() == FALSE)
     		{
     			$this->load->view('account/loginForm');
@@ -57,6 +58,16 @@ class Account extends CI_Controller {
     		}
     }
 
+    function check_captcha($captcha_code) {
+    	require_once 'securimage.php';
+    	$image = new Securimage();
+    	if ($image->check($captcha_code) == true) {
+    		return True;
+    	} else {
+    		return False;
+    	}
+    }
+    
     function logout() {
 		$user = $_SESSION['user'];
     		$this->load->model('user_model');
