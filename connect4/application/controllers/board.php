@@ -35,12 +35,17 @@ class Board extends CI_Controller {
 	    	}
 	    	else if ($user->user_status_id == User::PLAYING) {
 	    		$match = $this->match_model->get($user->match_id);
-	    		if ($match->user1_id == $user->id)
+	    		if ($match->user1_id == $user->id) {
+	    			$player = 1;
 	    			$otherUser = $this->user_model->getFromId($match->user2_id);
-	    		else
+	    		}
+	    		else  {
+	    			$player = 2;
 	    			$otherUser = $this->user_model->getFromId($match->user1_id);
+	    		}
 	    	}
 	    	
+	    	$data['player']=$player;
 	    	$data['user']=$user;
 	    	$data['otherUser']=$otherUser;
 	    	
@@ -137,6 +142,71 @@ class Board extends CI_Controller {
 		
 		error:
 		echo json_encode(array('status'=>'failure','message'=>$errormsg));
+ 	}
+
+ 	function postState() {
+ 			
+ 			$this->load->model('user_model');
+ 			$this->load->model('match_model');
+ 	
+ 			$user = $_SESSION['user'];
+ 				
+ 			$user = $this->user_model->getExclusive($user->login);
+ 			if ($user->user_status_id != User::PLAYING) {
+ 				$errormsg="Not in PLAYING state";
+ 				goto error;
+ 			}
+ 	
+ 			$match = $this->match_model->get($user->match_id);
+ 	
+ 			$state = $this->input->post('data');
+ 	
+ 			$this->match_model->updateBoardState($match->id, $state);
+ 				
+ 			echo json_encode(array('status'=>'success'));
+ 				
+ 			return;
+ 	
+ 		//$errormsg="Missing argument";
+ 			
+ 		error:
+ 		echo json_encode(array('status'=>'failure','message'=>$errormsg));
+ 	}
+ 	
+ 	function getState() {
+ 		$this->load->model('user_model');
+ 		$this->load->model('match_model');
+ 	
+ 		$user = $_SESSION['user'];
+ 	
+ 		$user = $this->user_model->get($user->login);
+ 		if ($user->user_status_id != User::PLAYING) {
+ 			$errormsg="Not in PLAYING state";
+ 			goto error;
+ 		}
+ 		// start transactional mode
+ 		$this->db->trans_begin();
+ 	
+ 		$match = $this->match_model->getExclusive($user->match_id);
+ 	
+ 		$state = $match->board_state;
+ 	
+ 		if ($this->db->trans_status() === FALSE) {
+ 			$errormsg = "Transaction error";
+ 			goto transactionerror;
+ 		}
+ 			
+ 		// if all went well commit changes
+ 		$this->db->trans_commit();
+ 			
+ 		echo json_encode(array('status'=>'success','state'=>$state));
+ 		return;
+ 	
+ 		transactionerror:
+ 		$this->db->trans_rollback();
+ 	
+ 		error:
+ 		echo json_encode(array('status'=>'failure','message'=>$errormsg));
  	}
  	
  }

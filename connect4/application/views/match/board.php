@@ -11,49 +11,8 @@
 		var otherUser = "<?= $otherUser->login ?>";
 		var user = "<?= $user->login ?>";
 		var status = "<?= $status ?>";
-		
-		$(function(){
-			$('body').everyTime(200,function(){
-					if (status == 'waiting') {
-						$.getJSON('<?= base_url() ?>arcade/checkInvitation',function(data, text, jqZHR){
-								if (data && data.status=='rejected') {
-									alert("Sorry, your invitation to play was declined!");
-									window.location.href = '<?= base_url() ?>arcade/index';
-								}
-								if (data && data.status=='accepted') {
-									status = 'playing';
-									$('#status').html('Playing ' + otherUser);
-								}
-								
-						});
-					}
-					var url = "<?= base_url() ?>board/getMsg";
-					$.getJSON(url, function (data,text,jqXHR){
-						if (data && data.status=='success') {
-							var conversation = $('[name=conversation]').val();
-							var msg = data.message;
-							if (msg.length > 0)
-								$('[name=conversation]').val(conversation + "\n" + otherUser + ": " + msg);
-						}
-					});
-			});
+		var player = -1;
 
-			$('form').submit(function(){
-				var arguments = $(this).serialize();
-				//var arguments = "msg=nothing";
-				var url = "<?= base_url() ?>board/postMsg";
-				$.post(url,arguments, function (data,textStatus,jqXHR){
-						var conversation = $('[name=conversation]').val();
-						var msg = $('[name=msg]').val();
-						$('[name=conversation]').val(conversation + "\n" + user + ": " + msg);
-						});
-				return false;
-				});	
-		});
-	
-	</script>
-	<script type="text/javascript"> 
-		// Render the board given a board element
 		function drawBoard(gameArray) {
    			for (var i=0; i<7; i++) {
         		for (var j=0; j<6; j++) {
@@ -141,10 +100,45 @@
 		        gameArray[i][j] = -1;
 		    }
 		}
-		        
-		$(document).ready(function(){
-		    
-		    $('.col').each(function() {
+		
+		$(function(){
+			//sets the player value
+			player = <?php echo $player ?>;
+
+			$('body').everyTime(200,function(){
+				if (status == 'waiting') {
+					$.getJSON('<?= base_url() ?>arcade/checkInvitation',function(data, text, jqZHR){
+							if (data && data.status=='rejected') {
+								alert("Sorry, your invitation to play was declined!");
+								window.location.href = '<?= base_url() ?>arcade/index';
+							}
+							if (data && data.status=='accepted') {
+								status = 'playing';
+								$('#status').html('Playing ' + otherUser);
+							}
+							
+					});
+				}
+				var url = "<?= base_url() ?>board/getMsg";
+				$.getJSON(url, function (data,text,jqXHR){
+					if (data && data.status=='success') {
+						var conversation = $('[name=conversation]').val();
+						var msg = data.message;
+						if (msg.length > 0)
+							$('[name=conversation]').val(conversation + "\n" + otherUser + ": " + msg);
+					}
+				});
+				var url = "<?= base_url() ?>board/getState";
+				$.getJSON(url, function (data,text,jqXHR){
+					if (data && data.status=='success' && data.state != null) {
+						//alert(data.state);
+						gameArray = $.parseJSON(data.state);
+						drawBoard(gameArray);
+					}
+				});
+			});
+			
+			$('.col').each(function() {
 		        empty_str = '<div class="canhover">1</div><div class="empty"></div>';
 		        html_str = empty_str;
 		        for (var i = 0; i <= 5; i++) {
@@ -159,7 +153,12 @@
 		    $('.col').hover(
 		         function () {
 		            if ($(this).find('.canhover').html() == 1) {
-		                $(this).find('.empty').css({"background-color":"red"});
+			            if (player == 1) {
+			                $(this).find('.empty').css({"background-color":"blue"});
+			            }
+			            else {
+			            	$(this).find('.empty').css({"background-color":"red"});
+			            } 
 		            }
 		         }, 
 		         function () {
@@ -174,16 +173,19 @@
 		        cutoutnum = cutoutPos(colnum, gameArray);
 		        
 		        if (cutoutnum != -1) {
-		            gameArray[colnum][cutoutnum] = 2;
+		            gameArray[colnum][cutoutnum] = player;
 		            $('.col').each(function() {
 		                $(this).find('.canhover').html('0');
 		            });
 		            
-		            $(this).find('.empty').css({"background-color":"red"});
+		            //$(this).find('.empty').css({"background-color":"red"});
 		            $(this).find('.empty').css({"-webkit-animation":"drop-down" + 
 		                                   cutoutnum + " " + (cutoutnum + 1) + "s"});
 		        }
-		        
+				var url = "<?= base_url() ?>board/postState";
+				$.post(url,"data=" + JSON.stringify(gameArray), function (){
+				});
+				return false;
 		     });
 		     
 		     $(".col").bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
@@ -195,7 +197,22 @@
 		            $(this).find('.canhover').html('1');
 		        });
 		     });
+
+			
+
+			$('form').submit(function(){
+				var arguments = JSON.stringify(gameArray);
+				var arguments = "msg=" + $('[name=msg]').val();
+				var url = "<?= base_url() ?>board/postMsg";
+				$.post(url,arguments, function (data,textStatus,jqXHR){
+						var conversation = $('[name=conversation]').val();
+						var msg = $('[name=msg]').val();
+						$('[name=conversation]').val(conversation + "\n" + user + ": " + msg);
+						});
+				return false;
+				});	
 		});
+	 
 </script>
 </head>
 <body>
@@ -216,12 +233,12 @@
 	
 <?php 
 	
-	//echo form_textarea('conversation');
+	echo form_textarea('conversation');
 	
-	//echo form_open();
-	//echo form_input('msg');
-	//echo form_submit('Send','Send');
-	//echo form_close();
+	echo form_open();
+	echo form_input('msg');
+	echo form_submit('Send','Send');
+	echo form_close();
 	
 ?>
 <div class="col" id="col0">
@@ -234,7 +251,7 @@
 </div>
 <div class="col" id="col4">
 </div>
-<div class="col" id="col5">
+<div class="col" id="col5"> 
 </div>
 <div class="col" id="col6">
 </div>
