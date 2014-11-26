@@ -11,7 +11,7 @@
 		var otherUser = "<?= $otherUser->login ?>";
 		var user = "<?= $user->login ?>";
 		var status = "<?= $status ?>";
-		var player = -1;
+		var player = <?php echo $player ?>;
 		var animDone = true;
 		var newGame = true;
 		var oldMove = [-1, -1];
@@ -40,49 +40,49 @@
 		function isWin(gameArray) {
     		for (var i=0; i<7; i++) {
         		for (var j=0; j<6; j++) {
-            		player = gameArray[i][j];
+            		gameplayer = gameArray[i][j];
             
-            		if (player != -1) {
+            		if (gameplayer != -1) {
  
                 		//horizontal win
                 		if ((i + 3) < 7) {
-                    		if ((player == gameArray[i + 1][j]) &&
-                        		(player == gameArray[i + 2][j]) &&
-                        		(player == gameArray[i + 3][j])) {
-                        		return player;
+                    		if ((gameplayer == gameArray[i + 1][j]) &&
+                        		(gameplayer == gameArray[i + 2][j]) &&
+                        		(gameplayer == gameArray[i + 3][j])) {
+                        		return gameplayer;
                     		}
                 		}
                 
                 		//vertical win
                 		if ((j + 3) < 6) {
-                    		if ((player == gameArray[i][j + 1]) &&
-                        		(player == gameArray[i][j + 2]) &&
-                        		(player == gameArray[i][j + 3])) {
-                        		return player;
+                    		if ((gameplayer == gameArray[i][j + 1]) &&
+                        		(gameplayer == gameArray[i][j + 2]) &&
+                        		(gameplayer == gameArray[i][j + 3])) {
+                        		return gameplayer;
                     		}
                 		}
                 
 		                //right diagonal win
 		                if (((i + 3) < 7) && ((j + 3) < 6)) {
-		                    if ((player == gameArray[i + 1][j + 1]) &&
-		                        (player == gameArray[i + 2][j + 2]) &&
-		                        (player == gameArray[i + 3][j + 3])) {
-		                        return player;
+		                    if ((gameplayer == gameArray[i + 1][j + 1]) &&
+		                        (gameplayer == gameArray[i + 2][j + 2]) &&
+		                        (gameplayer == gameArray[i + 3][j + 3])) {
+		                        return gameplayer;
 		                    }
 		                }
 		                
 		                //left diagonal win
 		                if (((i - 3) >= 0) && ((j - 3) >= 0)) {
-		                    if ((player == gameArray[i - 1][j - 1]) &&
-		                        (player == gameArray[i - 2][j - 2]) &&
-		                        (player == gameArray[i - 3][j - 3])) {
-		                        return player;
+		                    if ((gameplayer == gameArray[i - 1][j - 1]) &&
+		                        (gameplayer == gameArray[i - 2][j - 2]) &&
+		                        (gameplayer == gameArray[i - 3][j - 3])) {
+		                        return gameplayer;
 		                    }
 		                }
 		            }
 		        }
 		    }
-		    return player;
+		    return -1;
 		}
 		
 		// Return position value of available cutout spot in game board given
@@ -132,24 +132,24 @@
 							$('[name=conversation]').val(conversation + "\n" + otherUser + ": " + msg);
 					}
 				});
+				//alert(player);
+				if (currentPlayer == player && animDone && (isWin(gameArray) == -1)) {
+					$('.col').each(function() {
+			            $(this).find('.canhover').html('1');
+			        });
+				}
+				else {
+					$('.col').each(function() {
+						if (animDone) {
+							$(this).find('.empty').css({"background-color":"white"});
+						}
+			            $(this).find('.canhover').html('0');
+			        });
+				}
+				
 				var url = "<?= base_url() ?>board/getState";
 				$.getJSON(url, function (data,text,jqXHR){
 					if (data && data.status=='success' && data.state != null) {
-						//alert(data.state);
-						if (currentPlayer == player && animDone) {
-							$('.col').each(function() {
-					            $(this).find('.canhover').html('1');
-					        });
-						}
-						else {
-							$('.col').each(function() {
-								if (animDone) {
-									$(this).find('.empty').css({"background-color":"white"});
-								}
-					            $(this).find('.canhover').html('0');
-					        });
-						}
-
 						if (data.state != null) {
 							state = $.parseJSON(data.state);
 							currentMove = state[0]
@@ -213,7 +213,6 @@
 		     );
 		     
 		     $('.col').click(function() {
-			    alert(currentPlayer);
 		    	if (currentPlayer == player) {
 			        colnum = parseInt($(this).attr('id').substring(3, 4));
 			        cutoutnum = cutoutPos(colnum, gameArray);
