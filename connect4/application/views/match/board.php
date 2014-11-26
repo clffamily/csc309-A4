@@ -12,6 +12,7 @@
 		var user = "<?= $user->login ?>";
 		var status = "<?= $status ?>";
 		var player = -1;
+		var animDone = true;
 
 		function drawBoard(gameArray) {
    			for (var i=0; i<7; i++) {
@@ -133,7 +134,9 @@
 					if (data && data.status=='success' && data.state != null) {
 						//alert(data.state);
 						gameArray = $.parseJSON(data.state);
-						drawBoard(gameArray);
+						if (animDone) {
+							drawBoard(gameArray);
+						}
 					}
 				});
 			});
@@ -171,7 +174,7 @@
 		     $('.col').click(function() {
 		        colnum = parseInt($(this).attr('id').substring(3, 4));
 		        cutoutnum = cutoutPos(colnum, gameArray);
-		        
+		        animDone = false;
 		        if (cutoutnum != -1) {
 		            gameArray[colnum][cutoutnum] = player;
 		            $('.col').each(function() {
@@ -196,6 +199,7 @@
 		        $('.col').each(function() {
 		            $(this).find('.canhover').html('1');
 		        });
+		        animDone = true;
 		     });
 
 			
