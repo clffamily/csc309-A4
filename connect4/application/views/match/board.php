@@ -13,7 +13,10 @@
 		var status = "<?= $status ?>";
 		var player = -1;
 		var animDone = true;
-
+		var newGame = true;
+		var oldMove = [-1, -1];
+		var currentPlayer = 1;
+		
 		function drawBoard(gameArray) {
    			for (var i=0; i<7; i++) {
         		for (var j=0; j<6; j++) {
@@ -133,9 +136,47 @@
 				$.getJSON(url, function (data,text,jqXHR){
 					if (data && data.status=='success' && data.state != null) {
 						//alert(data.state);
-						gameArray = $.parseJSON(data.state);
-						if (animDone) {
-							drawBoard(gameArray);
+						if (currentPlayer == player && animDone) {
+							$('.col').each(function() {
+					            $(this).find('.canhover').html('1');
+					        });
+						}
+						else {
+							$('.col').each(function() {
+								if (animDone) {
+									$(this).find('.empty').css({"background-color":"white"});
+								}
+					            $(this).find('.canhover').html('0');
+					        });
+						}
+
+						if (data.state != null) {
+							state = $.parseJSON(data.state);
+							currentMove = state[0]
+							if (currentMove[0] != oldMove[0] || currentMove[1] != oldMove[1]) {
+								gameArray = state[2]
+								drawBoard(gameArray);
+								oldMove = currentMove;
+								colnum = currentMove[0];
+								cutoutnum = currentMove[1];
+								gameArray[colnum][cutoutnum] = currentPlayer;
+								if (currentPlayer == 1) {
+									colour = 'blue';
+								}
+								else {
+									colour = 'red';
+								}
+	
+								$('#col'+ colnum).find('.empty').css({"background-color":colour});
+								$('#col'+ colnum).find('.empty').css({"-webkit-animation":"drop-down" + 
+	        	                    cutoutnum + " " + (cutoutnum + 1) + "s"});
+        	                    animDone = false;
+							}
+											 
+							if (animDone) {
+								currentPlayer = state[1];
+								drawBoard(gameArray);
+							}
 						}
 					}
 				});
@@ -172,33 +213,45 @@
 		     );
 		     
 		     $('.col').click(function() {
-		        colnum = parseInt($(this).attr('id').substring(3, 4));
-		        cutoutnum = cutoutPos(colnum, gameArray);
-		        animDone = false;
-		        if (cutoutnum != -1) {
-		            gameArray[colnum][cutoutnum] = player;
-		            $('.col').each(function() {
-		                $(this).find('.canhover').html('0');
-		            });
-		            
-		            //$(this).find('.empty').css({"background-color":"red"});
-		            $(this).find('.empty').css({"-webkit-animation":"drop-down" + 
-		                                   cutoutnum + " " + (cutoutnum + 1) + "s"});
-		        }
-				var url = "<?= base_url() ?>board/postState";
-				$.post(url,"data=" + JSON.stringify(gameArray), function (){
-				});
-				return false;
+			    alert(currentPlayer);
+		    	if (currentPlayer == player) {
+			        colnum = parseInt($(this).attr('id').substring(3, 4));
+			        cutoutnum = cutoutPos(colnum, gameArray);
+			        animDone = false; 
+			        if (cutoutnum != -1) {
+				        nextMove = [colnum, cutoutnum];
+				        if (currentPlayer == 1) {
+							nextPlayer = 2;
+				        }
+				        else {
+							nextPlayer = 1;
+				        }
+			            //gameArray[colnum][cutoutnum] = player;
+			            $('.col').each(function() {
+			                $(this).find('.canhover').html('0');
+			            });
+			            
+			            //$(this).find('.empty').css({"background-color":"red"});
+			            //$(this).find('.empty').css({"-webkit-animation":"drop-down" + 
+			                                   //cutoutnum + " " + (cutoutnum + 1) + "s"});
+			        
+			        	state = [nextMove, nextPlayer, gameArray];
+						url = "<?= base_url() ?>board/postState";
+						$.post(url,"data=" + JSON.stringify(state), function (){
+						});
+						newGame = false;
+						return false;
+			        }
+		    	}
 		     });
 		     
 		     $(".col").bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
-		        $(this).find('.cutout5').css({"background-color":"red"});
 		        $(this).find('.empty').css({"background-color":"white"});
 		        $(this).find('.empty').css({"-webkit-animation":""});
 		        drawBoard(gameArray);
-		        $('.col').each(function() {
-		            $(this).find('.canhover').html('1');
-		        });
+		        //$('.col').each(function() {
+		          //  $(this).find('.canhover').html('1');
+		        //});
 		        animDone = true;
 		     });
 
