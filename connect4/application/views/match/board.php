@@ -213,7 +213,7 @@
 					}
 				}
 				
-				if ((isWin(gameArray) != -1 || isFull(gameArray)) && !gameOver) {
+				if (isWin(gameArray) != -1 || isFull(gameArray)) {
 					winner = isWin(gameArray);
 					gameOver = true;
 					if (isFull(gameArray)) {
