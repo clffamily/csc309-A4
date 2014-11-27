@@ -272,7 +272,7 @@
 		     );
 		     
 		     $('.col').click(function() {
-		    	if (currentPlayer == player) {
+		    	if (currentPlayer == player && !gameOver) {
 			        colnum = parseInt($(this).attr('id').substring(3, 4));
 			        cutoutnum = cutoutPos(colnum, gameArray);
 			        animDone = false; 
