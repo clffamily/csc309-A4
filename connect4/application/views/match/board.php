@@ -172,7 +172,6 @@
 				var url = "<?= base_url() ?>board/getState";
 				$.getJSON(url, function (data,text,jqXHR){
 					if (data && data.status=='success' && data.state != null) {
-						if (data.state != null) {
 							state = $.parseJSON(data.state);
 							currentMove = state[0];
 							gameArray = state[2];
@@ -191,14 +190,16 @@
 								$('#col'+ colnum).find('.empty').css({"background-color":colour});
 								$('#col'+ colnum).find('.empty').css({"-webkit-animation":"drop-down" + 
 	        	                    cutoutnum + " " + (cutoutnum + 1) + "s"});
+        	                    if (currentPlayer == player) {
+									currentPlayer = state[1];
+        	                    }
         	                    animDone = false;
 							}
 											 
 							if (animDone) {
 								currentPlayer = state[1];
 								drawBoard(gameArray);
-							}
-						}
+							}	
 					}
 				});
 
