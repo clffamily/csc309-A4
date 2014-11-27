@@ -11,11 +11,13 @@
 		var otherUser = "<?= $otherUser->login ?>";
 		var user = "<?= $user->login ?>";
 		var status = "<?= $status ?>";
-		var player = <?php echo $player ?>;
+		var player = <?= $player ?>;
+		var gamestatus = <?= $matchstatus ?>;
 		var animDone = true;
-		var newGame = true;
+		var gameOver = false;
 		var oldMove = [-1, -1];
 		var currentPlayer = 1;
+		
 		
 		function drawBoard(gameArray) {
    			for (var i=0; i<7; i++) {
@@ -72,10 +74,10 @@
 		                }
 		                
 		                //left diagonal win
-		                if (((i - 3) >= 0) && ((j - 3) >= 0)) {
-		                    if ((gameplayer == gameArray[i - 1][j - 1]) &&
-		                        (gameplayer == gameArray[i - 2][j - 2]) &&
-		                        (gameplayer == gameArray[i - 3][j - 3])) {
+		                if (((i + 3) < 7) && ((j - 3) >= 0)) {
+		                    if ((gameplayer == gameArray[i + 1][j - 1]) &&
+		                        (gameplayer == gameArray[i + 2][j - 2]) &&
+		                        (gameplayer == gameArray[i + 3][j - 3])) {
 		                        return gameplayer;
 		                    }
 		                }
@@ -83,6 +85,18 @@
 		        }
 		    }
 		    return -1;
+		}
+
+		//Return true if gameArray has only non negative values, else return false.
+		function isFull(gameArray) {
+			for (var i=0; i<7; i++) {
+        		for (var j=0; j<6; j++) {
+            		if (gameArray[i][j] == -1) {
+                		return false;
+            		}
+        		}
+			}
+			return true;
 		}
 		
 		// Return position value of available cutout spot in game board given
@@ -106,10 +120,18 @@
 		}
 		
 		$(function(){
+			
+			
+			//check if game already over
+			if (gamestatus != 1) {
+				gameOver = true;
+				
+			}
+			
 			//sets the player value
 			player = <?php echo $player ?>;
 
-			$('body').everyTime(200,function(){
+			$('body').everyTime(100,function(){
 				if (status == 'waiting') {
 					$.getJSON('<?= base_url() ?>arcade/checkInvitation',function(data, text, jqZHR){
 							if (data && data.status=='rejected') {
@@ -123,6 +145,7 @@
 							
 					});
 				}
+				
 				var url = "<?= base_url() ?>board/getMsg";
 				$.getJSON(url, function (data,text,jqXHR){
 					if (data && data.status=='success') {
@@ -132,7 +155,6 @@
 							$('[name=conversation]').val(conversation + "\n" + otherUser + ": " + msg);
 					}
 				});
-				//alert(player);
 				if (currentPlayer == player && animDone && (isWin(gameArray) == -1)) {
 					$('.col').each(function() {
 			            $(this).find('.canhover').html('1');
@@ -145,28 +167,27 @@
 						}
 			            $(this).find('.canhover').html('0');
 			        });
-				}
+				} 
 				
 				var url = "<?= base_url() ?>board/getState";
 				$.getJSON(url, function (data,text,jqXHR){
 					if (data && data.status=='success' && data.state != null) {
 						if (data.state != null) {
 							state = $.parseJSON(data.state);
-							currentMove = state[0]
-							if (currentMove[0] != oldMove[0] || currentMove[1] != oldMove[1]) {
-								gameArray = state[2]
-								drawBoard(gameArray);
+							currentMove = state[0];
+							gameArray = state[2];
+							drawBoard(gameArray);
+							colnum = currentMove[0];
+							cutoutnum = currentMove[1];
+							gameArray[colnum][cutoutnum] = state[3];
+							if ((currentMove[0] != oldMove[0] || currentMove[1] != oldMove[1]) && !gameOver) {
 								oldMove = currentMove;
-								colnum = currentMove[0];
-								cutoutnum = currentMove[1];
-								gameArray[colnum][cutoutnum] = currentPlayer;
-								if (currentPlayer == 1) {
+								if (state[3] == 1) {
 									colour = 'blue';
 								}
 								else {
 									colour = 'red';
 								}
-	
 								$('#col'+ colnum).find('.empty').css({"background-color":colour});
 								$('#col'+ colnum).find('.empty').css({"-webkit-animation":"drop-down" + 
 	        	                    cutoutnum + " " + (cutoutnum + 1) + "s"});
@@ -180,6 +201,44 @@
 						}
 					}
 				});
+
+				//Update match status
+				if (!gameOver) {
+					if (player == currentPlayer) {
+						$('#matchstatus').html("It's your turn!");
+					}
+					else{
+						$('#matchstatus').html("It's " + otherUser + "'s turn!");
+					}
+				}
+				
+				if ((isWin(gameArray) != -1 || isFull(gameArray)) && !gameOver) {
+					winner = isWin(gameArray);
+					gameOver = true;
+					if (isFull(gameArray)) {
+						entry = 4;
+						$('#matchstatus').html("It's a tie!");
+					}
+					else {
+						
+						if (player == winner) {
+							$('#matchstatus').html("You won!");
+						}
+						else{
+							$('#matchstatus').html(otherUser + " won this one!");
+						}
+						
+						if (winner == 1) {
+							entry = 2;
+						}
+						else if (winner == 2) {
+							entry = 3;
+						}
+					}
+					url = "<?= base_url() ?>board/postStatus";
+					$.post(url,"status=" + entry, function (){
+					});
+				}
 			});
 			
 			$('.col').each(function() {
@@ -225,16 +284,10 @@
 				        else {
 							nextPlayer = 1;
 				        }
-			            //gameArray[colnum][cutoutnum] = player;
 			            $('.col').each(function() {
 			                $(this).find('.canhover').html('0');
 			            });
-			            
-			            //$(this).find('.empty').css({"background-color":"red"});
-			            //$(this).find('.empty').css({"-webkit-animation":"drop-down" + 
-			                                   //cutoutnum + " " + (cutoutnum + 1) + "s"});
-			        
-			        	state = [nextMove, nextPlayer, gameArray];
+			        	state = [nextMove, nextPlayer, gameArray, currentPlayer];
 						url = "<?= base_url() ?>board/postState";
 						$.post(url,"data=" + JSON.stringify(state), function (){
 						});
@@ -248,13 +301,8 @@
 		        $(this).find('.empty').css({"background-color":"white"});
 		        $(this).find('.empty').css({"-webkit-animation":""});
 		        drawBoard(gameArray);
-		        //$('.col').each(function() {
-		          //  $(this).find('.canhover').html('1');
-		        //});
 		        animDone = true;
 		     });
-
-			
 
 			$('form').submit(function(){
 				var arguments = JSON.stringify(gameArray);
@@ -285,6 +333,8 @@
 		else
 			echo "Wating on " . $otherUser->login;
 	?>
+	</div>
+	<div id='matchstatus'>
 	</div>
 	
 <?php 

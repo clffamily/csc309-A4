@@ -34,9 +34,12 @@ class Board extends CI_Controller {
 	    		$invite = $this->invite_model->get($user->invite_id);
 	    		$otherUser = $this->user_model->getFromId($invite->user2_id);
 	    		$data['player']=$player;
+	    		$data['matchstatus'] = 1;
 	    	}
+	    	
 	    	else if ($user->user_status_id == User::PLAYING) {
 	    		$match = $this->match_model->get($user->match_id);
+	    		$data['matchstatus'] = $match->match_status_id;
 	    		if ($match->user1_id == $user->id) {
 	    			$player = 1;
 	    			$otherUser = $this->user_model->getFromId($match->user2_id);
@@ -47,6 +50,7 @@ class Board extends CI_Controller {
 	    		}
 	    		$data['player']=$player;
 	    	}
+	    	
 	    	
 	    	$data['user']=$user;
 	    	$data['otherUser']=$otherUser;
@@ -151,6 +155,8 @@ class Board extends CI_Controller {
  			$this->load->model('user_model');
  			$this->load->model('match_model');
  	
+ 			$errormsg="Missing argument";
+ 			
  			$user = $_SESSION['user'];
  				
  			$user = $this->user_model->getExclusive($user->login);
@@ -168,8 +174,6 @@ class Board extends CI_Controller {
  			echo json_encode(array('status'=>'success'));
  				
  			return;
- 	
- 		//$errormsg="Missing argument";
  			
  		error:
  		echo json_encode(array('status'=>'failure','message'=>$errormsg));
@@ -211,5 +215,33 @@ class Board extends CI_Controller {
  		echo json_encode(array('status'=>'failure','message'=>$errormsg));
  	}
  	
+ 	function postStatus() {
+ 	
+ 		$this->load->model('user_model');
+ 		$this->load->model('match_model');
+ 	
+ 		$errormsg="Missing argument";
+ 	
+ 		$user = $_SESSION['user'];
+ 			
+ 		$user = $this->user_model->getExclusive($user->login);
+ 		if ($user->user_status_id != User::PLAYING) {
+ 			$errormsg="Not in PLAYING state";
+ 			goto error;
+ 		}
+ 	
+ 		$match = $this->match_model->get($user->match_id);
+ 	
+ 		$status = $this->input->post('status');
+ 	
+ 		$this->match_model->updateMatchStatus($match->id, $status);
+ 			
+ 		echo json_encode(array('status'=>'success'));
+ 			
+ 		return;
+ 	
+ 		error:
+ 		echo json_encode(array('status'=>'failure','message'=>$errormsg));
+ 	}
  }
 
