@@ -30,10 +30,15 @@ class Board extends CI_Controller {
 	    	$invite = $this->invite_model->get($user->invite_id);
 	    	
 	    	if ($user->user_status_id == User::WAITING) {
+	    		
+	    		//the user who invites is established as user2 in the match database
+	    		//so set him/her as player 2.
 	    		$player = 2;
 	    		$invite = $this->invite_model->get($user->invite_id);
 	    		$otherUser = $this->user_model->getFromId($invite->user2_id);
 	    		$data['player']=$player;
+	    		
+	    	 	//initialize matchstatus as 'playing' or 1
 	    		$data['matchstatus'] = 1;
 	    	}
 	    	
@@ -41,6 +46,8 @@ class Board extends CI_Controller {
 	    		$match = $this->match_model->get($user->match_id);
 	    		$data['matchstatus'] = $match->match_status_id;
 	    		if ($match->user1_id == $user->id) {
+	    			
+	    			//since this is user1 establish him/her as player 2
 	    			$player = 1;
 	    			$otherUser = $this->user_model->getFromId($match->user2_id);
 	    		}

@@ -50,7 +50,6 @@ class Match_model extends CI_Model {
 	function updateMatchStatus($id, $status) {
 		$this->db->where('id',$id);
 		return $this->db->update('match',array('match_status_id'=>$status));
-	}
-	
+	}	
 }
 ?>

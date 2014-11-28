@@ -13,12 +13,21 @@
 		var status = "<?= $status ?>";
 		var player = <?= $player ?>;
 		var gamestatus = <?= $matchstatus ?>;
+
+		// controls animation in order to avoid drawing the board while animating
 		var animDone = true;
+
+		// so that no more further moves are made after the completion of a game
 		var gameOver = false;
+
+		// initializes oldMove which is used in comparing the getJSON values,
+		// to determine if animation is necessary
 		var oldMove = [-1, -1];
+		
 		var currentPlayer = 1;
 		
-		
+		//Controls/produces graphical representation of a connect4 game as contained in the
+		// array gameArray
 		function drawBoard(gameArray) {
    			for (var i=0; i<7; i++) {
         		for (var j=0; j<6; j++) {
@@ -84,6 +93,7 @@
 		            }
 		        }
 		    }
+		    // no win
 		    return -1;
 		}
 
@@ -122,7 +132,7 @@
 		$(function(){
 			
 			
-			//check if game already over
+			//check if game already over, this is only necessary if the browser is refreshed
 			if (gamestatus != 1) {
 				gameOver = true;
 				
@@ -155,11 +165,15 @@
 							$('[name=conversation]').val(conversation + "\n" + otherUser + ": " + msg);
 					}
 				});
+				
+				//Indicates that it's player's move allow hovering over columns and choosing a move
 				if (currentPlayer == player && animDone && (isWin(gameArray) == -1)) {
 					$('.col').each(function() {
 			            $(this).find('.canhover').html('1');
 			        });
 				}
+
+				//Remove capability of gameplay, and remove hovering on column divs
 				else {
 					$('.col').each(function() {
 						if (animDone) {
@@ -172,13 +186,20 @@
 				var url = "<?= base_url() ?>board/getState";
 				$.getJSON(url, function (data,text,jqXHR){
 					if (data && data.status=='success' && data.state != null) {
+						
+							//state info stored in database as blob converted back to array
 							state = $.parseJSON(data.state);
 							currentMove = state[0];
 							gameArray = state[2];
+
+							//set player's move after drawing board because we want the move to be
+							//animated.
 							drawBoard(gameArray);
 							colnum = currentMove[0];
 							cutoutnum = currentMove[1];
 							gameArray[colnum][cutoutnum] = state[3];
+
+							//if the move that was received differs from the old move, then animate the move
 							if ((currentMove[0] != oldMove[0] || currentMove[1] != oldMove[1]) && !gameOver) {
 								oldMove = currentMove;
 								if (state[3] == 1) {
@@ -187,16 +208,17 @@
 								else {
 									colour = 'red';
 								}
+
+								//css animation
 								$('#col'+ colnum).find('.empty').css({"background-color":colour});
 								$('#col'+ colnum).find('.empty').css({"-webkit-animation":"drop-down" + 
 	        	                    cutoutnum + " " + (cutoutnum + 1)/30 + "s"});
-        	                    if (currentPlayer == player) {
-									currentPlayer = state[1];
-        	                    }
+
         	                    animDone = false;
 							}
 											 
 							if (animDone) {
+								//switch the player to the next player
 								currentPlayer = state[1];
 								drawBoard(gameArray);
 							}	
@@ -212,7 +234,8 @@
 						$('#matchstatus').html("It's " + otherUser + "'s turn!");
 					}
 				}
-				
+
+				//If there is a win update the match status according to the type of win
 				if (isWin(gameArray) != -1 || isFull(gameArray)) {
 					winner = isWin(gameArray);
 					gameOver = true;
@@ -237,12 +260,20 @@
 						}
 					}
 					url = "<?= base_url() ?>board/postStatus";
+
+					//pass the type of win to controller board's function postStatus
+					//to add the status to the database
 					$.post(url,"status=" + entry, function (){
 					});
 				}
 			});
-			
+
+			//Essentially drawing the empty connect4 game space
 			$('.col').each(function() {
+
+				//in the canhover class there is a hidden value used to standin for a varibale
+				//to indicate which columns the player is allow to hover over, if 1 player can hover
+				//otherwise he/she can't hover.
 		        empty_str = '<div class="canhover">1</div><div class="empty"></div>';
 		        html_str = empty_str;
 		        for (var i = 0; i <= 5; i++) {
@@ -252,9 +283,9 @@
 		        $(this).html(html_str);
 		    });
 		    
-		    drawBoard(gameArray);
-		    
 		    $('.col').hover(
+				    
+				 //mouseover   
 		         function () {
 		            if ($(this).find('.canhover').html() == 1) {
 			            if (player == 1) {
@@ -265,6 +296,8 @@
 			            } 
 		            }
 		         }, 
+		         
+		         //mouseout
 		         function () {
 		            if ($(this).find('.canhover').html() == 1) {
 		                $(this).find('.empty').css({"background-color":"white"});
@@ -273,6 +306,8 @@
 		     );
 		     
 		     $('.col').click(function() {
+
+			    //Only the current player can click on a column add make a move
 		    	if (currentPlayer == player && !gameOver) {
 			        colnum = parseInt($(this).attr('id').substring(3, 4));
 			        cutoutnum = cutoutPos(colnum, gameArray); 
@@ -290,6 +325,9 @@
 			            });
 			        	state = [nextMove, nextPlayer, gameArray, currentPlayer];
 						url = "<?= base_url() ?>board/postState";
+
+						//state object passed as a string to controller board's function
+						//postState to add the game state to the database
 						$.post(url,"data=" + JSON.stringify(state), function (){
 						});
 						newGame = false;
@@ -297,7 +335,8 @@
 			        }
 		    	}
 		     });
-		     
+
+		     //waits for completion animation on class col.
 		     $(".col").bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
 		        $(this).find('.empty').css({"background-color":"white"});
 		        $(this).find('.empty').css({"-webkit-animation":""});
