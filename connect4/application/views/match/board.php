@@ -189,7 +189,7 @@
 								}
 								$('#col'+ colnum).find('.empty').css({"background-color":colour});
 								$('#col'+ colnum).find('.empty').css({"-webkit-animation":"drop-down" + 
-	        	                    cutoutnum + " " + (cutoutnum + 1) + "s"});
+	        	                    cutoutnum + " " + (cutoutnum + 1)/30 + "s"});
         	                    if (currentPlayer == player) {
 									currentPlayer = state[1];
         	                    }
@@ -226,7 +226,7 @@
 							$('#matchstatus').html("You won!");
 						}
 						else{
-							$('#matchstatus').html(otherUser + " won this one!");
+							$('#matchstatus').html("You lost!");
 						}
 						
 						if (winner == 1) {
@@ -275,9 +275,9 @@
 		     $('.col').click(function() {
 		    	if (currentPlayer == player && !gameOver) {
 			        colnum = parseInt($(this).attr('id').substring(3, 4));
-			        cutoutnum = cutoutPos(colnum, gameArray);
-			        animDone = false; 
+			        cutoutnum = cutoutPos(colnum, gameArray); 
 			        if (cutoutnum != -1) {
+			        	animDone = false;
 				        nextMove = [colnum, cutoutnum];
 				        if (currentPlayer == 1) {
 							nextPlayer = 2;
