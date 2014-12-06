@@ -12,16 +12,16 @@
     width: 55px;
     border-style: solid;
     border-width:3px;
-    border-color: white;
+    border-color: #eee;
     border-radius:50% 50% 50% 50%;
-    background-color: white;
+    background-color: #eee;
     position: relative;
     z-index: 10;
 }
 
 .col {
     width: 60px;
-    height: 360px;
+    height: 440px;
     float: left;
 }
 

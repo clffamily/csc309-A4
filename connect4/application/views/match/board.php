@@ -178,7 +178,7 @@
 				else {
 					$('.col').each(function() {
 						if (animDone) {
-							$(this).find('.empty').css({"background-color":"white"});
+							$(this).find('.empty').css({"background-color":"#eee"});
 						}
 			            $(this).find('.canhover').html('0');
 			        });
@@ -301,7 +301,7 @@
 		         //mouseout
 		         function () {
 		            if ($(this).find('.canhover').html() == 1) {
-		                $(this).find('.empty').css({"background-color":"white"});
+		                $(this).find('.empty').css({"background-color":"#eee"});
 		            }
 		         }
 		     );
@@ -339,7 +339,7 @@
 
 		     //waits for completion animation on class col.
 		     $(".col").bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
-		        $(this).find('.empty').css({"background-color":"white"});
+		        $(this).find('.empty').css({"background-color":"#eee"});
 		        $(this).find('.empty').css({"-webkit-animation":""});
 		        drawBoard(gameArray);
 		        animDone = true;
@@ -379,7 +379,20 @@
 	</div>
 	<div id='matchstatus' class="alert alert-danger" style="font-weight:bold">
 	</div>
-	
+	<div class="col" id="col0">
+</div>
+<div class="col" id="col1">
+</div>
+<div class="col" id="col2">
+</div>
+<div class="col" id="col3">
+</div>
+<div class="col" id="col4">
+</div>
+<div class="col" id="col5"> 
+</div>
+<div class="col" id="col6">
+</div>
 <?php 
 	
 	$conversation_input = array( 'name' => 'conversation', 'class' => 'form-control');
@@ -410,20 +423,7 @@
 </div>
 </div>
 </div>
-<div class="col" id="col0">
-</div>
-<div class="col" id="col1">
-</div>
-<div class="col" id="col2">
-</div>
-<div class="col" id="col3">
-</div>
-<div class="col" id="col4">
-</div>
-<div class="col" id="col5"> 
-</div>
-<div class="col" id="col6">
-</div>
+
 
 
 </div>
