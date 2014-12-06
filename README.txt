@@ -22,7 +22,7 @@ Description:
 	hovering the cursor over each column of the board, and then clicking on the column where they wish 
 	to drop his or her game piece. After each move a function checks whether the board is in a 
 	winning state or not. If after a player moves and the move is not a winning move, then the next 
-	player is given an opportunity to make a move. So, the game progesses, back and forth in this manner, 
+	player is given an opportunity to make a move. So, the game progresses, back and forth in this manner, 
 	until we are in a winning state, at which point no more gameplay is allowed, and a win status is sent 
 	to the database.
 	
@@ -50,4 +50,4 @@ Data Structure:
 			the current player's number, the next player's number, and the current game board array
 			before the move was made. This is passed to the database, as a JSON string, and then
 			retrieved by Get in order to animate the move, get the next player's id, change the game board,
-			and determine if a win has occured.
+			and determine if a win has occurrped.
