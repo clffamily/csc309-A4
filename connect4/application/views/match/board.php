@@ -3,6 +3,7 @@
 
 <html>
 <head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 <link rel="stylesheet" href="<?= base_url()?>css/board.css">
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 <script src="<?= base_url() ?>/js/jquery.timers.js"></script>
@@ -360,13 +361,15 @@
 </script>
 </head>
 <body>
+<div class="container"> 
+<div class="jumbotron">
 	<h1>Game Area</h1>
 
-	<div>
+	<div class="alert alert-default">
 	Hello <?= $user->fullName() ?>  <?= anchor('account/logout','(Logout)') ?>  
 	</div>
 
-	<div id='status'> 
+	<div id='status' class="alert alert-info" style="font-weight:bold"> 
 	<?php 
 		if ($status == "playing")
 			echo "Playing " . $otherUser->login;
@@ -374,19 +377,39 @@
 			echo "Wating on " . $otherUser->login;
 	?>
 	</div>
-	<div id='matchstatus'>
+	<div id='matchstatus' class="alert alert-danger" style="font-weight:bold">
 	</div>
 	
 <?php 
 	
-	echo form_textarea('conversation');
-	
+	$conversation_input = array( 'name' => 'conversation', 'class' => 'form-control');
+	echo form_textarea($conversation_input);
+	// echo form_textarea('conversation');
+	?>
+		
+<div class="form-inline">
+	<?php 	
 	echo form_open();
-	echo form_input('msg');
-	echo form_submit('Send','Send');
+	?>
+	
+<div class="form-group">
+	<?php
+	$msg_input = array( 'name' => 'msg', 'class' => 'form-control');
+	echo form_input($msg_input);
+	
+	$attributes = array(
+			'name' => 'Send',
+			'class' => 'btn btn-default',
+			'value' => 'Send'
+	);	
+	echo form_submit($attributes);
+	// echo form_submit('Send','Send');
 	echo form_close();
 	
 ?>
+</div>
+</div>
+</div>
 <div class="col" id="col0">
 </div>
 <div class="col" id="col1">
@@ -400,6 +423,9 @@
 <div class="col" id="col5"> 
 </div>
 <div class="col" id="col6">
+</div>
+
+
 </div>
 </body>
 

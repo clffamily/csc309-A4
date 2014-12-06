@@ -1,5 +1,5 @@
 
-<table>
+<table class="table">
 <?php 
 	if ($users) {
 		foreach ($users as $user) {

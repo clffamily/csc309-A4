@@ -4,7 +4,7 @@
 <html>
 	
 	<head>
-
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 	<script src="http://code.jquery.com/jquery-latest.js"></script>
 	<script src="<?= base_url() ?>/js/jquery.timers.js"></script>
 	<script>
@@ -31,9 +31,11 @@
 	</script>
 	</head> 
 <body>  
+	<div class="container"> 
+	<div class="jumbotron">
 	<h1>Connect 4</h1>
 
-	<div>
+	<div class="alert alert-default">
 	Hello <?= $user->fullName() ?>  <?= anchor('account/logout','(Logout)') ?>  <?= anchor('account/updatePasswordForm','(Change Password)') ?>
 	</div>
 	
@@ -44,8 +46,8 @@
 	<h2>Available Users</h2>
 	<div id="availableUsers">
 	</div>
-	
-	
+</div>
+</div>
 	
 </body>
 

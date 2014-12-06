@@ -24,27 +24,67 @@
 				}
 			}
 		</script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 	</head> 
 <body>  
-	<h1>Change Password</h1>
+<div class="container"> 
+<div class="jumbotron">
+<h1>Change Password</h1>
 <?php 
 	if (isset($errorMsg)) {
 		echo "<p>" . $errorMsg . "</p>";
 	}
 
 	echo form_open('account/updatePassword');
+	?>
+		
+<div class="form-group">
+	<?php 
 	echo form_label('Current Password'); 
 	echo form_error('oldPassword');
-	echo form_password('oldPassword',set_value('oldPassword'),"required");
+	$oldPassword_input = array( 'name' => 'oldPassword', 'class' => 'form-control');
+	echo form_password($oldPassword_input,set_value('oldPassword'),"required");
+	// echo form_password('oldPassword',set_value('oldPassword'),"required");
+	?>
+</div>
+				
+<div class="form-group">
+	<?php 
 	echo form_label('New Password'); 
 	echo form_error('newPassword');
-	echo form_password('newPassword','',"id='pass1' required");
+	$newPassword_input = array( 'name' => 'newPassword', 'class' => 'form-control');
+	echo form_password($newPassword_input,'',"id='pass1' required");
+	// echo form_password('newPassword','',"id='pass1' required");
+	?>
+</div>
+					
+<div class="form-group">
+	<?php 
 	echo form_label('Password Confirmation'); 
 	echo form_error('passconf');
-	echo form_password('passconf','',"id='pass2' required oninput='checkPassword();'");
-	echo form_submit('submit', 'Change Password');
+	$passconf_input = array( 'name' => 'passconf', 'class' => 'form-control');
+	echo form_password($passconf_input,'',"id='pass2' required oninput='checkPassword();'");
+	// echo form_password('passconf','',"id='pass2' required oninput='checkPassword();'");
+	?>
+</div>
+					
+<div class="form-group">
+	<?php
+	
+	$attributes = array(
+			'name' => 'submit',
+			'class' => 'btn btn-default',
+			'value' => 'Change Password'
+	);
+	
+	echo form_submit($attributes);
+	
+	// echo form_submit('submit', 'Change Password');
 	echo form_close();
 ?>	
+</div>
+</div>
+</div>
 </body>
 
 </html>
