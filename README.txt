@@ -50,4 +50,4 @@ Data Structure:
 			the current player's number, the next player's number, and the current game board array
 			before the move was made. This is passed to the database, as a JSON string, and then
 			retrieved by Get in order to animate the move, get the next player's id, change the game board,
-			and determine if a win has occurrped.
+			and determine if a win has occurred.
