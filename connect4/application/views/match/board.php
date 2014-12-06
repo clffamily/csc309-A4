@@ -18,6 +18,9 @@
 		// controls animation in order to avoid drawing the board while animating
 		var animDone = true;
 
+		// check if player has completed a move
+		var moveMade = false;
+
 		// so that no more further moves are made after the completion of a game
 		var gameOver = false;
 
@@ -221,6 +224,9 @@
 							if (animDone) {
 								//switch the player to the next player
 								currentPlayer = state[1];
+								if (currentPlayer != player) {
+									moveMade = false;
+								}
 								drawBoard(gameArray);
 							}	
 					}
@@ -288,7 +294,7 @@
 				    
 				 //mouseover   
 		         function () {
-		            if ($(this).find('.canhover').html() == 1) {
+		            if ($(this).find('.canhover').html() == 1 && !moveMade) {
 			            if (player == 1) {
 			                $(this).find('.empty').css({"background-color":"blue"});
 			            }
@@ -300,7 +306,7 @@
 		         
 		         //mouseout
 		         function () {
-		            if ($(this).find('.canhover').html() == 1) {
+		            if ($(this).find('.canhover').html() == 1 && !moveMade) {
 		                $(this).find('.empty').css({"background-color":"#eee"});
 		            }
 		         }
@@ -309,7 +315,7 @@
 		     $('.col').click(function() {
 
 			    //Only the current player can click on a column add make a move
-		    	if (currentPlayer == player && !gameOver) {
+		    	if (currentPlayer == player && !gameOver && !moveMade) {
 			        colnum = parseInt($(this).attr('id').substring(3, 4));
 			        cutoutnum = cutoutPos(colnum, gameArray); 
 			        if (cutoutnum != -1) {
@@ -331,6 +337,7 @@
 						//postState to add the game state to the database
 						$.post(url,"data=" + JSON.stringify(state), function (){
 						});
+						moveMade = true;
 						newGame = false;
 						return false;
 			        }
@@ -380,19 +387,19 @@
 	<div id='matchstatus' class="alert alert-danger" style="font-weight:bold">
 	</div>
 	<div class="col" id="col0">
-</div>
-<div class="col" id="col1">
-</div>
-<div class="col" id="col2">
-</div>
-<div class="col" id="col3">
-</div>
-<div class="col" id="col4">
-</div>
-<div class="col" id="col5"> 
-</div>
-<div class="col" id="col6">
-</div>
+	</div>
+	<div class="col" id="col1">
+	</div>
+	<div class="col" id="col2">
+	</div>
+	<div class="col" id="col3">
+	</div>
+	<div class="col" id="col4">
+	</div>
+	<div class="col" id="col5"> 
+	</div>
+	<div class="col" id="col6">
+	</div>
 <?php 
 	
 	$conversation_input = array( 'name' => 'conversation', 'class' => 'form-control');
