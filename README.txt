@@ -6,7 +6,7 @@ CDF accounts:
 
 
 General Information:
-	1. AMI ID: 
+	1. AMI ID: ami-ba2fb5d2
 	2. Location within AMI: /var/www/html/connect4
 	3. Browser: Latest version of Chrome
 
